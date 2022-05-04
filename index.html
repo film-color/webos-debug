@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>VIDAA debug page</title>
+  <meta charset="utf-8" />
+  <style>
+      body {
+          background: black;
+          color: white;
+      }
+
+      #errors {
+          position: fixed;
+          top: 50px;
+          right: 10px;
+          color: red;
+          font-weight: bold;
+      }
+
+      #keys {
+          position: fixed;
+          top: 10px;
+          right: 10px;
+      }
+
+      #hint, #useragent, #screen, #log {
+          padding-bottom: 1em;
+      }
+
+      .log_number {
+          color: green;
+          font-weight: bold;
+      }
+
+      .log_string {
+          color: violet;
+          font-weight: bold;
+      }
+
+      .log_boolean {
+          color: orange;
+          font-weight: bold;
+      }
+  </style>
+</head>
+<body>
+    <h1>VIDAA debug page</h1>
+
+    <div id="hint">
+        Press:
+        "1" - reload this page,
+        "2" - scroll top,
+        "4" - scroll up,
+        "5" - scroll down
+    </div>
+    <div id="errors"></div>
+
+    <div id="useragent"></div>
+
+    <div id="screen"></div>
+
+    <div id="keys">
+        Press any keys for dump key codes
+    </div>
+
+    <div id="log">
+        Hisense global properties:<br/>
+    </div>
+
+    <script>
+        (function() {
+            function printError(error) {
+                var div = document.querySelector('#errors');
+                div.innerHTML = error.message;
+            }
+
+            function printKey(code, key) {
+                var div = document.querySelector('#keys');
+                div.innerHTML = 'keyCode: ' + code + ', key: ' + key + '<br/>';
+            }
+
+            document.onkeydown = function(e) {
+                printKey(e.keyCode, e.key);
+
+                if (e.keyCode == 49) { // key 1
+                    window.location.reload(true);
+                }
+
+                if (e.keyCode == 50) { // key 2
+                    window.scrollTo(0, 0);
+                }
+
+                if (e.keyCode == 52) { // key 4
+                    window.scrollBy(0, -screen.height / 2);
+                }
+
+                if (e.keyCode == 53) { // key 5
+                    window.scrollBy(0, screen.height / 2);
+                }
+            }
+
+            window.addEventListener('error', function(e) {
+                printError(e);
+            });
+
+            function printRequest(method, url) {
+                var div = document.querySelector('#log');
+                div.innerHTML += '<br/>XMLHttpRequest, method: ' + method + ', url: ' + url;
+            }
+
+            // var oldOpen = window.XMLHttpRequest.prototype.open;
+            // window.XMLHttpRequest.prototype.open = function(method, url) {
+            //     printRequest(method, url);
+            //     return oldOpen.apply(this, arguments);
+            // };
+        })();
+    </script>
+
+    <script>
+    (function() {
+        document.querySelector('#useragent').innerHTML = '<b>UserAgent:</b> ' + navigator.userAgent;
+        document.querySelector('#screen').innerHTML = '<b>Screen (width, height, colorDepth, devicePixelRatio):</b> ' +
+            [screen.width, screen.height, screen.colorDepth, window.devicePixelRatio].join('&times;');
+
+        function printText(text) {
+            var div = document.querySelector('#log');
+            div.innerHTML += text;
+        }
+
+        var isFirst = true;
+
+        function printMethod(name, value, code) {
+            var div = document.querySelector('#log');
+            var type = typeof value;
+            var preparedValue = JSON.stringify(value);
+            var content = (isFirst ? '' : '<br/><br/>') + '<b>' + name + '</b>' +
+                ', returns: <span class="log_' + type + '">' + preparedValue + '</span>' +
+                '<br/>code: ' + code;
+
+            div.innerHTML += content;
+
+            isFirst = false;
+        }
+
+        function printProp(name, value) {
+            var div = document.querySelector('#log');
+            var preparedValue = JSON.stringify(value);
+            var content = '<br/><br/>' + '<b>' + name + '</b>' +
+                ' = ' + preparedValue;
+
+            div.innerHTML += content;
+        }
+
+        var unknown_params = ['x', 'y', 'z'];
+        var props = [];
+        var obj = window;
+        for (var i in obj) {
+            if (i.search(/WebSDK_|Hisense_|Sharp_|Toshiba_|omi|JHK|GM_/) !== -1) {
+                props.push(i);
+            }
+        }
+
+        props.sort();
+
+        props = [];
+        var buffer = Object.getOwnPropertyNames(window);
+        for (var i = 0; i < buffer.length; i++) {
+            if (buffer[i].search(/WebSDK_|Hisense_|Sharp_|Toshiba_|omi|JHK|GM_/) !== -1) {
+                props.push(buffer[i]);
+            }
+        }
+
+        for (i = 0; i < props.length; i++) {
+            var item = props[i];
+            var result = undefined;
+            var name = item;
+            var code = '';
+            if (typeof obj[item] === 'function') {
+                if (item !== 'Hisense_LoginWithVIDAA' && item.indexOf('Hisense_') !== -1) {
+                    result = obj[item]();
+                }
+
+                var len = obj[item].length;
+                name += '(' + (len ? unknown_params.slice(0, len).join(', ') : '') + ')';
+                code = obj[item].toString();
+
+                try {
+                    printMethod(name, result, code);
+                } catch(e) {
+                    //
+                }
+            } else {
+                try {
+                    printProp(item, obj[item]);
+                } catch(e) {
+                    //
+                }
+            }
+        }
+    })();
+    </script>
+
+    <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.js#startOpened=true,disableWhenFirebugActive=false"></script>-->
+ </body>
+</html>
