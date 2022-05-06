@@ -51,7 +51,8 @@
         "1" - reload this page,
         "2" - scroll top,
         "4" - scroll up,
-        "5" - scroll down
+        "5" - scroll down,
+        "6" - refresh global properties
     </div>
     <div id="errors"></div>
 
@@ -97,6 +98,10 @@
                 if (e.keyCode == 53) { // key 5
                     window.scrollBy(0, screen.height / 2);
                 }
+              
+                if (e.keyCode == 54) { // key 6
+                    printGlobalProperties();
+                }
             }
 
             window.addEventListener('error', function(e) {
@@ -117,7 +122,7 @@
     </script>
 
     <script>
-    (function() {
+    function printGlobalProperties() {
         document.querySelector('#useragent').innerHTML = '<b>UserAgent:</b> ' + navigator.userAgent;
         document.querySelector('#screen').innerHTML = '<b>Screen (width, height, colorDepth, devicePixelRatio):</b> ' +
             [screen.width, screen.height, screen.colorDepth, window.devicePixelRatio].join('&times;');
@@ -197,7 +202,9 @@
                 }
             }
         }
-    })();
+    }
+      
+    printGlobalProperties();
     </script>
 
     <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/firebug-lite/1.4.0/firebug-lite.js#startOpened=true,disableWhenFirebugActive=false"></script>-->
