@@ -157,8 +157,8 @@
         }
 
         var props = [];
-        var buffer = Object.getOwnPropertyNames(window);
-        for (var i = 0; i < buffer.length; i++) {
+        var obj = window;
+        for (var i in obj) {
             props.push(buffer[i]);
         }
 
