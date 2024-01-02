@@ -156,23 +156,10 @@
             div.innerHTML += content;
         }
 
-        var unknown_params = ['x', 'y', 'z'];
         var props = [];
-        var obj = window;
-        for (var i in obj) {
-            if (i.search(/WebSDK_|Hisense_|Sharp_|Toshiba_|omi|JHK|GM_/) !== -1) {
-                props.push(i);
-            }
-        }
-
-        props.sort();
-
-        props = [];
         var buffer = Object.getOwnPropertyNames(window);
         for (var i = 0; i < buffer.length; i++) {
-            if (buffer[i].search(/WebSDK_|Hisense_|Sharp_|Toshiba_|omi|JHK|GM_/) !== -1) {
-                props.push(buffer[i]);
-            }
+            props.push(buffer[i]);
         }
 
         for (i = 0; i < props.length; i++) {
@@ -181,12 +168,10 @@
             var name = item;
             var code = '';
             if (typeof obj[item] === 'function') {
-                if (item !== 'Hisense_LoginWithVIDAA' && item.indexOf('Hisense_') !== -1) {
-                    result = obj[item]();
-                }
+                result = '';//obj[item]();
 
                 var len = obj[item].length;
-                name += '(' + (len ? unknown_params.slice(0, len).join(', ') : '') + ')';
+                //name += '(' + (len ? unknown_params.slice(0, len).join(', ') : '') + ')';
                 code = obj[item].toString();
 
                 try {
